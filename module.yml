@@ -1,0 +1,94 @@
+---
+# Copyright 2018 widdix GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'cfn-modules: AWS VPC NAT gateway'
+# cfn-modules:implements()
+Parameters:
+  PublicSubnetModule:
+    Description: 'Stack name of vpc-subnet module that acts as the public subnet of the availability zone'
+    Type: String
+  PrivateSubnetModule:
+    Description: 'Stack name of vpc-subnet module that acts as the private subnet of the availability zone'
+    Type: String
+  AlertingModule:
+    Description: 'Optional but recommended stack name of alerting module.'
+    Type: String
+    Default: ''
+Conditions:
+  HasAlertingModule: !Not [!Equals [!Ref AlertingModule, '']]
+Resources:
+  ElasticIp:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  NatGateway:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt 'ElasticIp.AllocationId'
+      SubnetId:
+        'Fn::ImportValue': !Sub '${PublicSubnetModule}-SubnetId'
+  Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        'Fn::ImportValue': !Sub '${PrivateSubnetModule}-RouteTableId'
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway
+  AlarmNatGatewayErrorPortAllocation:
+    Condition: HasAlertingModule
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmDescription: 'NAT gateway could not allocate a source port'
+      Namespace: 'AWS/NATGateway'
+      MetricName: ErrorPortAllocation
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: 0
+      AlarmActions:
+      - 'Fn::ImportValue': !Sub '${AlertingModule}-Arn'
+      Dimensions:
+      - Name: NatGatewayId
+        Value: !Ref NatGateway
+  AlarmNatGatewayPacketsDropCount:
+    Condition: HasAlertingModule
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmDescription: 'NAT gateway dropped packets'
+      Namespace: 'AWS/NATGateway'
+      MetricName: PacketsDropCount
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: 0
+      AlarmActions:
+      - 'Fn::ImportValue': !Sub '${AlertingModule}-Arn'
+      Dimensions:
+      - Name: NatGatewayId
+        Value: !Ref NatGateway
+Outputs:
+  ModuleId:
+    Value: 'vpc-nat-gateway'
+  ModuleVersion:
+    Value: '0.0.2'
+  StackName:
+    Value: !Ref 'AWS::StackName'
+  PublicIpAddress:
+    Description: 'The public IP address of the NAT gateway.'
+    Value: !Ref ElasticIp
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicIpAddress'
