@@ -1,7 +1,8 @@
 {
   "name": "@cfn-modules/vpc-nat-gateway",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "AWS VPC NAT gateway",
   "author": "Michael Wittig <michael@widdix.de>",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "keywords": ["cfn-modules"]
 }

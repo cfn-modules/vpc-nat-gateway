@@ -38,7 +38,7 @@ Resources:
     Properties:
       AllocationId: !GetAtt 'ElasticIp.AllocationId'
       SubnetId:
-        'Fn::ImportValue': !Sub '${PublicSubnetModule}-SubnetId'
+        'Fn::ImportValue': !Sub '${PublicSubnetModule}-Id'
   Route:
     Type: AWS::EC2::Route
     Properties:
@@ -84,7 +84,7 @@ Outputs:
   ModuleId:
     Value: 'vpc-nat-gateway'
   ModuleVersion:
-    Value: '0.0.2'
+    Value: '0.0.3'
   StackName:
     Value: !Ref 'AWS::StackName'
   PublicIpAddress:
