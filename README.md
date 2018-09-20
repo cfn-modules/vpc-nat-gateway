@@ -9,3 +9,4 @@ This is an internal module. Have a look at the [vpc](https://www.npmjs.com/packa
 
 * Highly available: NAT gateways only live in a single AZ by design (use on in each AZ to overcome limitation)
 * Scalable: NAT gateways capacity (CPU, RAM, network, ...) is limited by design
+* Monitoring: Network In+Out is not monitored
