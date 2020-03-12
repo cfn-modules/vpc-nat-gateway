@@ -86,7 +86,7 @@ Resources:
     Properties:
       AlarmActions:
       - 'Fn::ImportValue': !Sub '${AlertingModule}-Arn'
-      AlarmDescription: 'NAT gateway bandwith utilization is over 80%'
+      AlarmDescription: 'NAT gateway bandwidth utilization is over 80%'
       ComparisonOperator: GreaterThanThreshold
       EvaluationPeriods: 1
       Metrics:
