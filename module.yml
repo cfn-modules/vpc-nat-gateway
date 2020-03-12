@@ -80,7 +80,7 @@ Resources:
       Dimensions:
       - Name: NatGatewayId
         Value: !Ref NatGateway
-  AlarmNatGatewayBahndwith:
+  AlarmNatGatewayBandwidth:
     Condition: HasAlertingModule
     Type: 'AWS::CloudWatch::Alarm'
     Properties:
