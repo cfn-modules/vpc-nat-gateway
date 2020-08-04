@@ -17,12 +17,12 @@ jobs:
     - name: yamlllint
       run: |
         pip install yamllint==1.24.2
-        yamllint module.yml && yamllint test/*.yml
+        yamllint module.yml
 
     - name: cfn-lint
       run: |
         pip install cfn-lint==0.34.0
-        cfn-lint -t module.yml && cfn-lint -t test/*.yml
+        cfn-lint -t module.yml
 
     - name: license
       run: |
