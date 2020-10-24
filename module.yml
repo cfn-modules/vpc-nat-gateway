@@ -19,15 +19,27 @@ Parameters:
   PublicSubnetModule:
     Description: 'Stack name of vpc-subnet module that acts as the public subnet of the availability zone'
     Type: String
-  PrivateSubnetModule:
+  PrivateSubnetModuleA:
     Description: 'Stack name of vpc-subnet module that acts as the private subnet of the availability zone'
     Type: String
+    Default: ''
+  PrivateSubnetModuleB:
+    Description: 'Stack name of vpc-subnet module that acts as the private subnet of the availability zone'
+    Type: String
+    Default: ''
+  PrivateSubnetModuleC:
+    Description: 'Stack name of vpc-subnet module that acts as the private subnet of the availability zone'
+    Type: String
+    Default: ''
   AlertingModule:
     Description: 'Optional but recommended stack name of alerting module.'
     Type: String
     Default: ''
 Conditions:
   HasAlertingModule: !Not [!Equals [!Ref AlertingModule, '']]
+  HasPrivateSubnetModuleA: !Not [!Equals [!Ref PrivateSubnetModuleA, '']]
+  HasPrivateSubnetModuleB: !Not [!Equals [!Ref PrivateSubnetModuleB, '']]
+  HasPrivateSubnetModuleC: !Not [!Equals [!Ref PrivateSubnetModuleC, '']]
 Resources:
   ElasticIp:
     Type: 'AWS::EC2::EIP'
@@ -39,11 +51,28 @@ Resources:
       AllocationId: !GetAtt 'ElasticIp.AllocationId'
       SubnetId:
         'Fn::ImportValue': !Sub '${PublicSubnetModule}-Id'
-  Route:
+  RouteA:
+    Condition: HasPrivateSubnetModuleA
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
-        'Fn::ImportValue': !Sub '${PrivateSubnetModule}-RouteTableId'
+        'Fn::ImportValue': !Sub '${PrivateSubnetModuleA}-RouteTableId'
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway
+  RouteB:
+    Condition: HasPrivateSubnetModuleB
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        'Fn::ImportValue': !Sub '${PrivateSubnetModuleB}-RouteTableId'
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway
+  RouteC:
+    Condition: HasPrivateSubnetModuleC
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        'Fn::ImportValue': !Sub '${PrivateSubnetModuleC}-RouteTableId'
       DestinationCidrBlock: '0.0.0.0/0'
       NatGatewayId: !Ref NatGateway
   AlarmNatGatewayErrorPortAllocation:
